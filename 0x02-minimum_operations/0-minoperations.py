@@ -1,14 +1,20 @@
 #!/usr/bin/python3
 """
-Main file for testing
+Minimum Operations calculates fewest number of ops
+needed to result in exactly n H characters in the file
 """
 
-minOperations = __import__('0-minoperations').minOperations
 
-n = 4
-print("Min number of operations to reach {} char: {}".format(
-    n, minOperations(n)))
-
-n = 12
-print("Min number of operations to reach {} char: {}".format(
-    n, minOperations(n)))
+def minOperations(n):
+    """
+    Minimum Operations calculates fewest number of ops
+    needed to result in exactly n H characters in the file
+    """
+    min = 2
+    operations = 0
+    while n > 1:
+        while not n % min:
+            operations += min
+            n /= min
+        min += 1
+    return operations
