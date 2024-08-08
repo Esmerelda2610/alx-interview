@@ -8,32 +8,46 @@ let people = [];
 const names = [];
 
 const requestCharacters = async () => {
-  await new Promise(resolve => request(filmUrl, (error, response, body) => {
-    if (error || response.StatusCode !== 200) {
-      console.error('Error: ', error, '| StatusCode: ', response.statusCode);
-    } else {
-      const filmData = JSON.parse(body);
-      people = filmData.characters;
-      resolve();
-    }
-  }));
+  try {
+    const response = await new Promise((resolve, reject) => {
+      request(filmUrl, (err, response, body) => {
+        if (err || response.statusCode !== 200) {
+          reject(err);
+        } else {
+          resolve(body);
+        }
+      });
+    });
+    const filmData = JSON.parse(response);
+    people = filmData.characters;
+  } catch (error) {
+    console.error('Error fetching characters:', error);
+  }
 };
 
 const requestNames = async () => {
   if (people.length > 0) {
-    for (const p of people) {
-      await new Promise(resolve => request(p, (error, response, body) => {
-        if (error || response.statusCode !== 200) {
-          console.error('Error: ', '| StatusCode: ', response.statusCode);
-        } else {
-          const filmData = JSON.parse(body);
-          names.push(filmData.name);
-          resolve();
-        }
-      }));
+    try {
+      for (const p of people) {
+        const response = await new Promise((resolve, reject) => {
+          request(p, (err, response, body) => {
+            if (err || response.statusCode !== 200) {
+              reject(err);
+            } else {
+              resolve(body);
+            }
+          });
+        });
+        const characterData = JSON.parse(response);
+        names.push(characterData.name);
+      }
+    } catch (error) {
+      if (error.response && error.response.statusCode === 404) {
+        console.error('Error: Movie not found');
+      } else {
+        console.error('Error fetching data:', error);
+      }
     }
-  } else {
-    console.error('Error: Got no Characters for some reason');
   }
 };
 
